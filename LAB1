@@ -1,0 +1,89 @@
+-- ======================================================================
+-- UNIVERSITY MANAGEMENT SYSTEM - DDL OPERATIONS
+-- ======================================================================
+
+-- DDL: Step 1 - Database Setup
+DROP DATABASE IF EXISTS UniversityDB;
+CREATE DATABASE UniversityDB;
+USE UniversityDB;
+
+-- DDL: Step 2 - Create Tables (5 Tables with PK and FK)
+
+-- 1. Departments Table (Parent Table)
+CREATE TABLE Departments (
+    DeptID CHAR(4) PRIMARY KEY,
+    DeptName VARCHAR(100) NOT NULL UNIQUE,
+    OfficeNumber VARCHAR(10)
+);
+
+-- 2. Professors Table (FK to Departments)
+CREATE TABLE Professors (
+    ProfessorID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    HireDate DATE,
+    Salary DECIMAL(10, 2), -- Column to be dropped later
+    DeptID CHAR(4),
+    FOREIGN KEY (DeptID) REFERENCES Departments(DeptID)
+);
+
+-- 3. Students Table (FK to Departments)
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    DateOfBirth DATE,
+    MajorDeptID CHAR(4),
+    FOREIGN KEY (MajorDeptID) REFERENCES Departments(DeptID)
+);
+
+-- 4. Courses Table (FK to Departments and Professors)
+CREATE TABLE Courses (
+    CourseID CHAR(6) PRIMARY KEY,
+    CourseName VARCHAR(100) NOT NULL, -- Column to be modified later (size 150)
+    Credits DECIMAL(2, 1) DEFAULT 3.0,
+    DeptID CHAR(4),
+    ProfessorID INT,
+    FOREIGN KEY (DeptID) REFERENCES Departments(DeptID),
+    FOREIGN KEY (ProfessorID) REFERENCES Professors(ProfessorID)
+);
+
+-- 5. Enrollments Table (Linking Students and Courses - Composite Keys)
+CREATE TABLE Enrollments (
+    EnrollmentID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT NOT NULL,
+    CourseID CHAR(6) NOT NULL,
+    EnrollmentDate DATE DEFAULT (CURRENT_DATE()),
+    Grade CHAR(2),
+    -- Constraint to prevent a student from enrolling in the same course twice
+    UNIQUE (StudentID, CourseID),
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
+);
+
+
+-- ======================================================================
+-- DDL: Step 3 - Modifying Tables (ALTER)
+-- ======================================================================
+
+-- 1. Add a new column PhoneNumber (VARCHAR, 15) to the Students table.
+ALTER TABLE Students
+ADD COLUMN PhoneNumber VARCHAR(15);
+
+-- Check the change: DESCRIBE Students;
+
+-- 2. Modify the CourseName column in Courses to allow up to 150 characters.
+ALTER TABLE Courses
+MODIFY COLUMN CourseName VARCHAR(150) NOT NULL;
+
+-- Check the change: DESCRIBE Courses;
+
+-- 3. Remove the Salary column from the Professors table.
+ALTER TABLE Professors
+DROP COLUMN Salary;
+
+-- Check the change: DESCRIBE Professors;
+
+
+-- =================
