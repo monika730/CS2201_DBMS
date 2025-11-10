@@ -1,0 +1,178 @@
+-- ======================================================================
+-- ONLINE SHOPPING SYSTEM - DDL and DML Operations
+-- ======================================================================
+
+-- DDL: Step 1 - Create Database
+DROP DATABASE IF EXISTS OnlineShoppingDB;
+CREATE DATABASE OnlineShoppingDB;
+USE OnlineShoppingDB;
+
+-- DDL: Step 2 - Create Tables
+
+-- 1. Customers Table
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    City VARCHAR(50)
+);
+
+-- 2. Products Table
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(100) NOT NULL,
+    Category VARCHAR(50),
+    Price DECIMAL(10, 2) NOT NULL,
+    StockQuantity INT
+);
+
+-- 3. Stores Table
+CREATE TABLE Stores (
+    StoreID INT PRIMARY KEY,
+    StoreName VARCHAR(100) NOT NULL,
+    Location VARCHAR(100)
+);
+
+-- 4. Orders Table (Stores order details)
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    OrderDate DATE,
+    TotalAmount DECIMAL(10, 2),
+    StoreID INT,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (StoreID) REFERENCES Stores(StoreID)
+);
+
+-- 5. OrderDetails Table (Linking Orders and Products)
+CREATE TABLE OrderDetails (
+    OrderDetailID INT PRIMARY KEY,
+    OrderID INT,
+    ProductID INT,
+    Quantity INT NOT NULL,
+    PriceAtSale DECIMAL(10, 2),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+-- 6. Payments Table
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY,
+    OrderID INT,
+    PaymentDate DATE,
+    Amount DECIMAL(10, 2),
+    PaymentMethod VARCHAR(50),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
+
+
+-- ======================================================================
+-- DML: Step 3 - Insert 5 Records for all tables
+-- ======================================================================
+
+-- Insert 5 Records into Customers
+INSERT INTO Customers (CustomerID, FirstName, LastName, Email, City) VALUES
+(1, 'Sara', 'Khan', 'sara.k@mail.com', 'Mumbai'),
+(2, 'Rajiv', 'Mehta', 'rajiv.m@mail.com', 'Delhi'),
+(3, 'Priya', 'Sharma', 'priya.s@mail.com', 'Bangalore'),
+(4, 'Vikram', 'Yadav', 'vikram.y@mail.com', 'Chennai'),
+(5, 'Anita', 'Reddy', 'anita.r@mail.com', 'Hyderabad');
+
+-- Insert 5 Records into Products
+INSERT INTO Products (ProductID, ProductName, Category, Price, StockQuantity) VALUES
+(101, 'Laptop Pro', 'Electronics', 75000.00, 15),
+(102, 'Wooden Chair', 'Furniture', 4500.00, 20),
+(103, 'T-shirt Casual', 'Apparel', 800.00, 50),
+(104, 'Office Desk', 'Furniture', 12000.00, 10),
+(105, 'Smartphone X', 'Electronics', 40000.00, 30);
+
+-- Insert 5 Records into Stores
+INSERT INTO Stores (StoreID, StoreName, Location) VALUES
+(10, 'TechHub', 'Gachibowli'),
+(20, 'HomeGoods', 'Kukatpally'),
+(30, 'FashionPoint', 'Jubilee Hills'),
+(40, 'MegaMart', 'Banjara Hills'),
+(50, 'QuickStop', 'Madhapur');
+
+-- Insert 5 Records into Orders
+INSERT INTO Orders (OrderID, CustomerID, OrderDate, TotalAmount, StoreID) VALUES
+(100, 1, '2025-09-20', 75000.00, 10),
+(101, 3, '2025-09-21', 4500.00, 20),
+(102, 2, '2025-09-21', 800.00, 30),
+(103, 4, '2025-09-22', 12000.00, 20),
+(104, 5, '2025-09-22', 40000.00, 10);
+
+-- Insert 5 Records into OrderDetails
+INSERT INTO OrderDetails (OrderDetailID, OrderID, ProductID, Quantity, PriceAtSale) VALUES
+(1000, 100, 101, 1, 75000.00), -- Laptop Pro
+(1001, 101, 102, 1, 4500.00),  -- Wooden Chair
+(1002, 102, 103, 1, 800.00),   -- T-shirt
+(1003, 103, 104, 1, 12000.00), -- Office Desk
+(1004, 104, 105, 1, 40000.00); -- Smartphone X
+
+-- Insert 5 Records into Payments
+INSERT INTO Payments (PaymentID, OrderID, PaymentDate, Amount, PaymentMethod) VALUES
+(500, 100, '2025-09-20', 75000.00, 'Credit Card'),
+(501, 101, '2025-09-21', 4500.00, 'Debit Card'),
+(502, 102, '2025-09-21', 800.00, 'UPI'),
+(503, 103, '2025-09-22', 12000.00, 'Credit Card'),
+(504, 104, '2025-09-22', 40000.00, 'Net Banking');
+
+
+-- ======================================================================
+-- DML: Step 4 - Update Operations
+-- ======================================================================
+
+-- 1. Update the stock quantity of a product after a sale.
+-- Assuming a sale of 1 unit of ProductID 103 (T-shirt Casual) occurred.
+UPDATE Products
+SET StockQuantity = StockQuantity - 1
+WHERE ProductID = 103;
+
+SELECT ProductID, ProductName, StockQuantity FROM Products WHERE ProductID = 103; -- Verify update (should be 49)
+
+-- 2. Increase the price of all products in the "Furniture" category by 10%.
+UPDATE Products
+SET Price = Price * 1.10
+WHERE Category = 'Furniture';
+
+SELECT ProductID, ProductName, Price FROM Products WHERE Category = 'Furniture'; -- Verify update
+
+-- 3. (Optional DML: DELETE Example) Delete an old order/payment
+-- Deleting the payment associated with OrderID 102 first (due to Foreign Key constraint)
+DELETE FROM Payments
+WHERE OrderID = 102;
+
+-- Now delete the order and its details
+DELETE FROM OrderDetails
+WHERE OrderID = 102;
+
+DELETE FROM Orders
+WHERE OrderID = 102;
+
+-- ======================================================================
+-- DML: Step 5 - Retrieve all the records from the database (SELECT)
+-- ======================================================================
+
+-- Retrieve all records from Customers
+SELECT '--- All Customers ---' AS TableName, Customers.* FROM Customers;
+
+-- Retrieve all records from Products (Check updated stock/price)
+SELECT '--- All Products ---' AS TableName, Products.* FROM Products;
+
+-- Retrieve all records from Stores
+SELECT '--- All Stores ---' AS TableName, Stores.* FROM Stores;
+
+-- Retrieve all records from Orders (Order 102 should be missing)
+SELECT '--- All Orders ---' AS TableName, Orders.* FROM Orders;
+
+-- Retrieve all records from OrderDetails (OrderDetails 1002 should be missing)
+SELECT '--- All OrderDetails ---' AS TableName, OrderDetails.* FROM OrderDetails;
+
+-- Retrieve all records from Payments (Payment 502 should be missing)
+SELECT '--- All Payments ---' AS TableName, Payments.* FROM Payments;
+
+-- ======================================================================
+-- END OF DML ACTIVITY
+-- ======================================================================
