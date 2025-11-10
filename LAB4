@@ -1,0 +1,181 @@
+-- ======================================================================
+-- Lab Experiment 04 – Implementation of Different Types of Operators in SQL
+-- ======================================================================
+
+-- Step 1: Create Database
+DROP DATABASE IF EXISTS OperatorLab;
+CREATE DATABASE OperatorLab;
+USE OperatorLab;
+
+-- Step 2: Create Tables
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Age INT,
+    Salary DECIMAL(10, 2),
+    Department VARCHAR(50),
+    HireDate DATE,
+    Address VARCHAR(100)
+);
+
+CREATE TABLE Departments (
+    DepartmentID INT PRIMARY KEY,
+    DepartmentName VARCHAR(50),
+    EmployeeID INT,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+
+-- Step 3: Insert Sample Data
+INSERT INTO Employees (EmployeeID, Name, Age, Salary, Department, HireDate, Address) VALUES
+(1001, 'Praneetha', 28, 60000, 'IT', '2024-05-01', '123 Main St, New York'),
+(1002, 'Dhanishka', 45, 80000, 'HR', '2020-07-15', '456 Elm St, Chicago'),
+(1003, 'Mahendra', 32, 55000, 'Finance', '2022-01-10', '789 Oak St, Los Angeles'),
+(1004, 'Pinky', 38, 75000, 'HR', '2021-10-30', '101 Pine St, New York');
+
+INSERT INTO Departments (DepartmentID, DepartmentName, EmployeeID) VALUES
+(1, 'IT', 1001),
+(2, 'HR', 1002),
+(3, 'Finance', 1003);
+
+
+-- ======================================================================
+-- PRACTICE TASKS - IMPLEMENTATION
+-- ======================================================================
+
+-- ========================
+-- Exercise 1: Arithmetic Operators
+-- ========================
+
+-- a. Add a bonus (10% of Salary) to each employee's salary.
+SELECT Name, Salary, Salary * 1.10 AS Salary_with_Bonus
+FROM Employees;
+
+-- b. Subtract tax (15% of Salary) from each employee's salary.
+SELECT Name, Salary, Salary * 0.85 AS Salary_after_Tax
+FROM Employees;
+
+-- c. Calculate the yearly salary from the monthly salary (Salary * 12).
+SELECT Name, Salary AS Monthly_Salary, Salary * 12 AS Yearly_Salary
+FROM Employees;
+
+-- d. Find the remainder when employees' ages are divided by 5.
+SELECT Name, Age, Age % 5 AS Age_Remainder_Div_5
+FROM Employees;
+
+
+-- ========================
+-- Exercise 2: Logical Operators
+-- ========================
+
+-- a. Employees older than 30 and salary greater than 50000.
+SELECT *
+FROM Employees
+WHERE Age > 30 AND Salary > 50000;
+
+-- b. Employees either in 'HR' department OR salary > 70000.
+SELECT *
+FROM Employees
+WHERE Department = 'HR' OR Salary > 70000;
+
+-- c. Employees who do NOT live in 'New York'.
+SELECT *
+FROM Employees
+WHERE NOT Address LIKE '%New York%';
+
+
+-- ========================
+-- Exercise 3: Comparison Operators
+-- ========================
+
+-- a. Find employees with salary = 60000.
+SELECT *
+FROM Employees
+WHERE Salary = 60000;
+
+-- b. List employees not in the 'IT' department.
+SELECT *
+FROM Employees
+WHERE Department <> 'IT';
+
+-- c. Retrieve employees younger than 25 with salary > 50000. (Returns no rows with current data)
+SELECT *
+FROM Employees
+WHERE Age < 25 AND Salary > 50000;
+
+
+-- ========================
+-- Exercise 4: Special Operators
+-- ========================
+
+-- a. BETWEEN → List employees with age between 25 and 35.
+SELECT *
+FROM Employees
+WHERE Age BETWEEN 25 AND 35;
+
+-- b. IN → Find employees working in 'HR', 'IT', or 'Finance'.
+SELECT *
+FROM Employees
+WHERE Department IN ('HR', 'IT', 'Finance');
+
+-- c. LIKE → Find employees whose names start with 'A'.
+SELECT *
+FROM Employees
+WHERE Name LIKE 'A%';
+
+-- d. IS NULL → List employees whose address is not available. (Returns no rows with current data)
+SELECT *
+FROM Employees
+WHERE Address IS NULL;
+
+
+-- ========================
+-- Exercise 5: Set Operators (MySQL Workarounds)
+-- ========================
+
+-- NOTE: Creating placeholder tables for Set Operator examples (Employees2022 and Employees2023)
+-- This simulates having two tables from different years.
+
+-- Placeholder Table 1 (e.g., Employees hired before 2023)
+CREATE TABLE Employees2022 AS
+SELECT EmployeeID, Name, Department FROM Employees WHERE HireDate < '2023-01-01';
+
+-- Placeholder Table 2 (e.g., All employees)
+CREATE TABLE Employees2023 AS
+SELECT EmployeeID, Name, Department FROM Employees;
+
+-- Insert a unique entry into 2023 for 'EXCEPT' example
+INSERT INTO Employees2023 (EmployeeID, Name, Department) VALUES (1005, 'Eva', 'Marketing');
+
+
+-- a. UNION → Retrieve employees from 'HR' department in 2023 and 2022.
+-- UNION combines the results of two SELECT statements and removes duplicates.
+SELECT Name FROM Employees2023 WHERE Department = 'HR'
+UNION
+SELECT Name FROM Employees2022 WHERE Department = 'HR';
+
+
+-- b. INTERSECT (Workaround using INNER JOIN) → Find common employees in 'IT' department across 2022 & 2023.
+-- INTERSECT finds common rows. In MySQL, INNER JOIN is used.
+SELECT T2023.Name
+FROM Employees2023 AS T2023
+INNER JOIN Employees2022 AS T2022
+  ON T2023.Name = T2022.Name  -- Matching common names
+WHERE T2023.Department = 'IT' AND T2022.Department = 'IT';
+
+
+-- c. EXCEPT (Workaround using LEFT JOIN / IS NULL) → Find employees who worked in 2023 but not in 2022.
+-- EXCEPT finds rows present in the first table but not in the second. In MySQL, LEFT JOIN with a NULL check is used.
+SELECT T2023.Name
+FROM Employees2023 AS T2023
+LEFT JOIN Employees2022 AS T2022
+  ON T2023.Name = T2022.Name -- Try to find a match in 2022
+WHERE T2022.EmployeeID IS NULL; -- Select only those who had NO match in 2022 (i.e., Eva)
+
+
+-- Clean up placeholder tables (optional)
+DROP TABLE Employees2022;
+DROP TABLE Employees2023;
+
+-- ======================================================================
+-- END OF EXPERIMENT 04
+-- ======================================================================
