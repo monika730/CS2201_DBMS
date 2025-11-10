@@ -1,0 +1,121 @@
+- ======================================================================
+-- Lab Experiment 09 – Implementation of Procedures in SQL
+-- (Basic Procedure, Insert, Update, Delete)
+-- ======================================================================
+
+-- Step 1: Create Database
+DROP DATABASE IF EXISTS ProcedureLab;
+CREATE DATABASE ProcedureLab;
+USE ProcedureLab;
+
+-- Step 2: Create Table
+CREATE TABLE Employees (
+    EmpID INT PRIMARY KEY AUTO_INCREMENT,
+    EmpName VARCHAR(100),
+    Department VARCHAR(50),
+    Salary DECIMAL(10,2)
+);
+
+-- Step 3: Insert Sample Data
+INSERT INTO Employees (EmpName, Department, Salary) VALUES
+('Praneetha', 'IT', 60000.00),
+('Dhanishka', 'HR', 75000.00),
+('Mahendra', 'Finance', 55000.00),
+('Pinky', 'HR', 70000.00);
+
+-- ======================================================================
+-- PROCEDURES IMPLEMENTATION
+-- ======================================================================
+
+-- ========================
+-- 1. Basic Procedure: Retrieve All Employees
+-- ========================
+DELIMITER //
+CREATE PROCEDURE sp_GetAllEmployees()
+BEGIN
+    SELECT * FROM Employees;
+END //
+DELIMITER ;
+
+-- Execute
+CALL sp_GetAllEmployees();
+
+-- ========================
+-- 2. Insert Procedure
+-- ========================
+DELIMITER //
+CREATE PROCEDURE sp_InsertEmployee(
+    IN p_EmpName VARCHAR(100),
+    IN p_Department VARCHAR(50),
+    IN p_Salary DECIMAL(10,2)
+)
+BEGIN
+    INSERT INTO Employees (EmpName, Department, Salary)
+    VALUES (p_EmpName, p_Department, p_Salary);
+END //
+DELIMITER ;
+
+-- Execute
+CALL sp_InsertEmployee('Kavya', 'Marketing', 65000.00);
+
+-- ========================
+-- 3. Update Procedure
+-- ========================
+DELIMITER //
+CREATE PROCEDURE sp_UpdateEmployee(
+    IN p_EmpID INT,
+    IN p_EmpName VARCHAR(100),
+    IN p_Department VARCHAR(50),
+    IN p_Salary DECIMAL(10,2)
+)
+BEGIN
+    UPDATE Employees
+    SET EmpName = p_EmpName,
+        Department = p_Department,
+        Salary = p_Salary
+    WHERE EmpID = p_EmpID;
+END //
+DELIMITER ;
+
+-- Execute
+CALL sp_UpdateEmployee(1, 'Praneetha R', 'IT', 65000.00);
+
+-- ========================
+-- 4. Delete Procedure
+-- ========================
+DELIMITER //
+CREATE PROCEDURE sp_DeleteEmployee(
+    IN p_EmpID INT
+)
+BEGIN
+    DELETE FROM Employees
+    WHERE EmpID = p_EmpID;
+END //
+DELIMITER ;
+
+-- Execute
+CALL sp_DeleteEmployee(4);
+
+-- ========================
+-- 5. Fetch Specific Employee (Optional)
+-- ========================
+DELIMITER //
+CREATE PROCEDURE sp_GetEmployeeByID(
+    IN p_EmpID INT
+)
+BEGIN
+    SELECT * FROM Employees WHERE EmpID = p_EmpID;
+END //
+DELIMITER ;
+
+-- Execute
+CALL sp_GetEmployeeByID(2);
+
+-- ======================================================================
+-- STEP 4: Verify Changes
+-- ======================================================================
+SELECT * FROM Employees;
+
+-- ======================================================================
+-- END OF EXPERIMENT 09
+-- ==============================
