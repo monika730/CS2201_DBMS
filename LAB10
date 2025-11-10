@@ -1,0 +1,147 @@
+-- ======================================================================
+-- Lab Experiment 10 – Implementation of Triggers in SQL
+-- (Validation BEFORE & AFTER INSERT, UPDATE, DELETE)
+-- ======================================================================
+
+-- Step 1: Create Database
+DROP DATABASE IF EXISTS TriggerLab;
+CREATE DATABASE TriggerLab;
+USE TriggerLab;
+
+-- Step 2: Create Table
+CREATE TABLE Employees (
+    EmpID INT PRIMARY KEY AUTO_INCREMENT,
+    EmpName VARCHAR(100),
+    Department VARCHAR(50),
+    Salary DECIMAL(10,2)
+);
+
+-- Step 3: Insert Sample Data
+INSERT INTO Employees (EmpName, Department, Salary) VALUES
+('Praneetha', 'IT', 60000.00),
+('Dhanishka', 'HR', 75000.00),
+('Mahendra', 'Finance', 55000.00);
+
+-- ======================================================================
+-- TRIGGERS IMPLEMENTATION
+-- ======================================================================
+
+-- ========================
+-- 1. BEFORE INSERT Trigger: Validate Salary > 0
+-- ========================
+DELIMITER //
+CREATE TRIGGER trg_BeforeInsert_Employees
+BEFORE INSERT ON Employees
+FOR EACH ROW
+BEGIN
+    IF NEW.Salary <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Salary must be greater than 0';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- 2. AFTER INSERT Trigger: Log Insert
+-- ========================
+CREATE TABLE EmployeeLog (
+    LogID INT PRIMARY KEY AUTO_INCREMENT,
+    EmpID INT,
+    Action VARCHAR(20),
+    ActionTime DATETIME
+);
+
+DELIMITER //
+CREATE TRIGGER trg_AfterInsert_Employees
+AFTER INSERT ON Employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO EmployeeLog (EmpID, Action, ActionTime)
+    VALUES (NEW.EmpID, 'INSERT', NOW());
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- 3. BEFORE UPDATE Trigger: Validate Department not empty
+-- ========================
+DELIMITER //
+CREATE TRIGGER trg_BeforeUpdate_Employees
+BEFORE UPDATE ON Employees
+FOR EACH ROW
+BEGIN
+    IF NEW.Department = '' OR NEW.Department IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Department cannot be empty';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- 4. AFTER UPDATE Trigger: Log Update
+-- ========================
+DELIMITER //
+CREATE TRIGGER trg_AfterUpdate_Employees
+AFTER UPDATE ON Employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO EmployeeLog (EmpID, Action, ActionTime)
+    VALUES (NEW.EmpID, 'UPDATE', NOW());
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- 5. BEFORE DELETE Trigger: Prevent deletion of IT department
+-- ========================
+DELIMITER //
+CREATE TRIGGER trg_BeforeDelete_Employees
+BEFORE DELETE ON Employees
+FOR EACH ROW
+BEGIN
+    IF OLD.Department = 'IT' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete employees from IT department';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- 6. AFTER DELETE Trigger: Log Deletion
+-- ========================
+DELIMITER //
+CREATE TRIGGER trg_AfterDelete_Employees
+AFTER DELETE ON Employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO EmployeeLog (EmpID, Action, ActionTime)
+    VALUES (OLD.EmpID, 'DELETE', NOW());
+END;
+//
+DELIMITER ;
+
+-- ======================================================================
+-- STEP 4: TEST TRIGGERS
+-- ======================================================================
+
+-- Valid Insert
+INSERT INTO Employees (EmpName, Department, Salary) VALUES ('Kavya', 'Marketing', 65000);
+
+-- Invalid Insert (Salary <= 0)
+-- INSERT INTO Employees (EmpName, Department, Salary) VALUES ('Test', 'IT', -500); -- Error
+
+-- Update Department to empty (will fail)
+-- UPDATE Employees SET Department = '' WHERE EmpID = 2; -- Error
+
+-- Delete employee from IT department (will fail)
+-- DELETE FROM Employees WHERE EmpID = 1; -- Error
+
+-- Delete other employee (works)
+DELETE FROM Employees WHERE EmpID = 3;
+
+-- View Logs
+SELECT * FROM EmployeeLog;
+
+-- ======================================================================
+-- END OF EXPERIMENT 10
+-- ==========================
