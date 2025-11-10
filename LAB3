@@ -1,0 +1,123 @@
+-- ======================================================================
+-- TECHSOLUTIONS DATABASE: SQL FUNCTION QUERIES
+-- ======================================================================
+
+USE TechSolutionsDB; -- Assuming you run the previous CREATE/INSERT statements first
+
+-- ======================================================================
+-- Number Functions [ ROUND, ABS and CEIL ]
+-- ======================================================================
+SELECT '--- Number Functions ---' AS Function_Type;
+
+-- a. Round Salaries: Query to round the salaries of all employees to the nearest integer.
+SELECT
+    FirstName,
+    LastName,
+    Salary AS Original_Salary,
+    ROUND(Salary) AS Rounded_Salary
+FROM Employees;
+
+-- b. Absolute Values: Write a query to get the absolute values of these salary column.
+-- Since salary is always positive, ABS will return the original value, but demonstrates the function.
+SELECT
+    FirstName,
+    LastName,
+    Salary,
+    ABS(Salary) AS Absolute_Salary
+FROM Employees;
+
+-- c. Ceiling Values: Query to get the ceiling value of total amounts for orders.
+SELECT
+    OrderID,
+    TotalAmount AS Original_Amount,
+    CEIL(TotalAmount) AS Ceiling_Amount
+FROM Orders;
+
+-- ======================================================================
+-- Aggregate Functions [ COUNT, SUM, AVG, MAX and MIN]
+-- ======================================================================
+SELECT '--- Aggregate Functions ---' AS Function_Type;
+
+-- a. Count of Employees: Query to find the total number of employees.
+SELECT COUNT(EmployeeID) AS Total_Employees
+FROM Employees;
+
+-- b. Sum of Salaries: Query to calculate the total salary expense for the company.
+SELECT SUM(Salary) AS Total_Salary_Expense
+FROM Employees;
+
+-- c. Average Order Amount: Query to find the average total amount of orders.
+SELECT AVG(TotalAmount) AS Average_Order_Amount
+FROM Orders;
+
+-- d. Maximum and Minimum Salary: Query to find the highest and lowest salary among employees.
+SELECT
+    MAX(Salary) AS Highest_Salary,
+    MIN(Salary) AS Lowest_Salary
+FROM Employees;
+
+-- ======================================================================
+-- Character Functions [ UPPER, LOWER, CONCAT, SUBSTRING ]
+-- ======================================================================
+SELECT '--- Character Functions ---' AS Function_Type;
+
+-- a. Convert Names to Upper and Lower Case: Query to convert employee names to uppercase and lowercase.
+SELECT
+    FirstName,
+    UPPER(FirstName) AS First_Name_UPPER,
+    LOWER(LastName) AS Last_Name_lower
+FROM Employees;
+
+-- b. Concatenate Names: Query to concatenate the first name and last name of employees to create a full name.
+SELECT
+    CONCAT(FirstName, ' ', LastName) AS Full_Name
+FROM Employees;
+
+-- c. Extract Substring: Query to extract the first 3 characters of names.
+-- Note: The instruction asked for "product names," but no Product table exists, so applying it to Employee Names.
+SELECT
+    FirstName,
+    SUBSTRING(FirstName, 1, 3) AS Name_Prefix
+FROM Employees;
+
+-- ======================================================================
+-- Conversion Functions [CAST]
+-- ======================================================================
+SELECT '--- Conversion Functions ---' AS Function_Type;
+
+-- Convert String to Date: Convert a string representation of a date into a DATE data type.
+SELECT
+    '2025-12-31' AS Original_String,
+    CAST('2025-12-31' AS DATE) AS Converted_Date;
+
+
+-- ======================================================================
+-- Date Functions [NOW, YEAR, DATE_ADD/ADDDATE, DATEDIFF]
+-- MySQL equivalent functions are used for DATEPART and DATEADD.
+-- ======================================================================
+SELECT '--- Date Functions ---' AS Function_Type;
+
+-- a. Current Date and Time: Query to get the current date and time.
+SELECT NOW() AS Current_DateTime;
+
+-- b. Extract Year from Order Date: Query to extract the year from the order date. (Using YEAR, equivalent to DATEPART(year, ...))
+SELECT
+    OrderID,
+    OrderDate,
+    YEAR(OrderDate) AS Order_Year
+FROM Orders;
+
+-- c. Add Months to Order Date: Query to add 3 months to the order date. (Using DATE_ADD, equivalent to DATEADD)
+SELECT
+    OrderID,
+    OrderDate AS Original_Date,
+    DATE_ADD(OrderDate, INTERVAL 3 MONTH) AS Date_Plus_3_Months
+FROM Orders;
+
+-- d. Calculate Days Since Order: Query to find the number of days since each order was placed from today. (Using DATEDIFF)
+-- Note: Result will vary based on the date the query is executed.
+SELECT
+    OrderID,
+    OrderDate,
+    DATEDIFF(CURRENT_DATE(), OrderDate) AS Days_Since_Order
+FROM Orders;
